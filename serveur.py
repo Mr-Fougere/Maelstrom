@@ -23,8 +23,8 @@ conn.autocommit =True
 cur = conn.cursor()
 cur2 =conn.cursor()
 
-broker = 'vd6db0fa.eu-central-1.emqx.cloud'
-port = 15775 
+broker = '51.255.47.95'
+port = 1883 
 topics = ["newplayer"]
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
@@ -245,13 +245,19 @@ def checkMAC(MAC):
     l=open("logId.txt","r")
     lines=l.readlines()
     unassigned=True
+    party=""
+    idAssigned=""
     for line in lines:
         if compMac+" assigned" in line:
             unassigned=False
+            idAssigned=line[line.index(compMac)-2:line.index(compMac)+12]
+            party=line[line.index('P'):len(line)-2]
         elif compMac+" unassigned" in line:
+            indexLine=0
             unassigned=True
-    l.close()
-
+    l.close()    
+    if not unassigned:
+        publish(client,MAC,str(party)+"/"+str(idAssigned)+"/In")
     return unassigned
 
 def convMac(mac):
@@ -287,23 +293,26 @@ def generateID(msg):
     slicedTemp=""
     global lastNGame
     l=open("logId.txt","r")
-    lineCount=len(l.readlines())
-    if lineCount%2 == 0:
-        slicedTemp="M1"
+    lines=l.readlines()
+    l.close()
+    nextPlayer="M1"
+    for line in lines:
+        if "M1" in line and " assigned " in line :
+            nextPlayer="M2"
+        elif "M2" in line and " assigned " in line:
+            nextPlayer="M1"
+    if nextPlayer=="M1":
         nGame = generateGame()
         lastNGame = nGame
     else:
-        slicedTemp="M2"
-        nGame=lastNGame
-    slicedTemp=slicedTemp+convMac(msg)
-    l.close()
+        nGame=lastNGame 
+    slicedTemp=nextPlayer+convMac(msg)
     topics.append(f"{nGame}/{slicedTemp}/Out")
-    writeLog("logId.txt",slicedTemp+ " assigned")
+    writeLog("logId.txt",slicedTemp+ " assigned to "+nGame)
     if slicedTemp[0:2]=="M1":
        updtTable("Games",nGame,["IdJ1"],[slicedTemp])
     else:
        updtTable("Games",nGame,["IdJ2"],[slicedTemp])
-    print(msg,slicedTemp)
     subscribe(client)
     publish(client,msg,lastNGame+"/"+slicedTemp+"/In")
     publish(client,"test/reception",lastNGame+"/"+slicedTemp)
