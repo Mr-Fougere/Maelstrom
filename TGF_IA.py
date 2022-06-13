@@ -28,9 +28,9 @@ cur = conn.cursor()
 
 global loop
 loop=0
-broker = 'vd6db0fa.eu-central-1.emqx.cloud'
-port = 15775
-adrMacs=["00:00:00:00:00:00"]
+broker = '51.255.47.95'
+port = 1883 
+adrMacs=[]
 topics = ["TGF"]
 client_id = 'TheGrumpyFrenchman'
 username = 'TGF'
@@ -63,8 +63,6 @@ def border(prvMoves):
                 lastY=int(m[2])
         elif m[0]=='S':
             break
-    print([lastX,lastY])
-    print([firstX,firstY])
     if firstX==lastX:
         if firstY > lastY:
             border1=[firstX,firstY+1]
@@ -140,7 +138,6 @@ class DataDB:
         grillAtk(self.previousMoves)
         if pos[0] =='S':
             brdr=border(self.previousMoves)
-            print(brdr)
             for b in brdr:
                 if b not in self.deadPos and b[1]>=0 and b[1]<10 and b[0]>=0 and b[0]<10:
                     self.deadPos.append(b)
@@ -279,10 +276,12 @@ def publish(client,topicUp,msgUp):
          
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg): 
-        print(adrMacs,msg.topic)
         #print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
         if msg.topic == "TGF" and msg.payload.decode()=="G08":
-            adrMacs.append(newMac(adrMacs[-1]))
+            if adrMacs:
+                adrMacs.append(newMac(adrMacs[-1]))
+            else:
+                adrMacs.append(newMac(None))
             publish(client,"newplayer",adrMacs[-1])  
         elif msg.topic in adrMacs:
             TSP=slicerTopic(msg.payload.decode())
@@ -290,7 +289,6 @@ def subscribe(client: mqtt_client):
             publish(client,TSP.pub,"G01") 
             time.sleep(1) 
             publish(client,TSP.pub,"G02")
-            print(topics)
             ## maria_query='SELECT IdGame,IdIA,Data FROM TGF WHERE IdGame="'+TSP.game+'"'
             ## cur.execute(maria_query)
             ## for (IdGame,IdIA,Data) in cur:         
