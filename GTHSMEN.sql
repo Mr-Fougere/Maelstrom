@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 13, 2022 at 06:43 PM
+-- Generation Time: Jun 14, 2022 at 02:14 PM
 -- Server version: 10.3.34-MariaDB-0ubuntu0.20.04.1
 -- PHP Version: 7.4.3
 
@@ -30,7 +30,7 @@ USE `GTHSMEN`;
 -- Table structure for table `Games`
 --
 
-CREATE TABLE IF NOT EXISTS `Games` (
+CREATE TABLE `Games` (
   `IdGame` varchar(255) NOT NULL,
   `IdJ1` varchar(255) DEFAULT NULL,
   `IdJ2` varchar(255) DEFAULT NULL,
@@ -39,8 +39,7 @@ CREATE TABLE IF NOT EXISTS `Games` (
   `LastMsgUp` varchar(255) DEFAULT NULL,
   `LastMsgDown` varchar(255) DEFAULT NULL,
   `Timestamp` int(255) DEFAULT NULL,
-  `IntervalTime` int(255) DEFAULT NULL,
-  PRIMARY KEY (`IdGame`)
+  `IntervalTime` int(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
@@ -49,24 +48,23 @@ CREATE TABLE IF NOT EXISTS `Games` (
 -- Table structure for table `IA_DB`
 --
 
-CREATE TABLE IF NOT EXISTS `IA_DB` (
+CREATE TABLE `IA_DB` (
   `position` varchar(255) NOT NULL,
   `Targetted` int(11) DEFAULT NULL,
-  `Hitted` int(11) DEFAULT NULL,
+  `Hit` int(11) DEFAULT NULL,
   `Missed` int(11) DEFAULT NULL,
-  `Boated` int(11) DEFAULT NULL,
+  `HasBoat` int(11) DEFAULT NULL,
   `GameNumber` int(11) DEFAULT NULL,
-  `Found` float GENERATED ALWAYS AS (`Hitted` / `Boated`) VIRTUAL,
-  `RateHit` float GENERATED ALWAYS AS (`Hitted` / `Targetted`) VIRTUAL,
-  `RateTarget` float GENERATED ALWAYS AS (`Targetted` / `GameNumber`) VIRTUAL,
-  PRIMARY KEY (`position`)
+  `RateFound` float GENERATED ALWAYS AS (`HasBoat` / `Targetted`) VIRTUAL,
+  `RateHit` float GENERATED ALWAYS AS (`Hit` / `Targetted`) VIRTUAL,
+  `RateTarget` float GENERATED ALWAYS AS (`Targetted` / `GameNumber`) VIRTUAL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `IA_DB`
 --
 
-INSERT INTO `IA_DB` (`position`, `Targetted`, `Hitted`, `Missed`, `Boated`, `GameNumber`) VALUES
+INSERT INTO `IA_DB` (`position`, `Targetted`, `Hit`, `Missed`, `HasBoat`, `GameNumber`) VALUES
 ('00', NULL, NULL, NULL, NULL, NULL),
 ('01', NULL, NULL, NULL, NULL, NULL),
 ('02', NULL, NULL, NULL, NULL, NULL),
@@ -174,28 +172,48 @@ INSERT INTO `IA_DB` (`position`, `Targetted`, `Hitted`, `Missed`, `Boated`, `Gam
 -- Table structure for table `TGF`
 --
 
-CREATE TABLE IF NOT EXISTS `TGF` (
+CREATE TABLE `TGF` (
   `IdGame` varchar(255) NOT NULL,
   `IdIA` varchar(255) NOT NULL,
-  `Data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`Data`)),
-  `Id` varchar(255) NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`IdIA`)
+  `Data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`Data`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE USER TGF IDENTIFIED 'TGF123Soleil';
+--
+-- Indexes for dumped tables
+--
 
-CREATE USER Serveur IDENTIFIED 'Serveur123Soleil';
+--
+-- Indexes for table `Games`
+--
+ALTER TABLE `Games`
+  ADD PRIMARY KEY (`IdGame`);
+
+--
+-- Indexes for table `IA_DB`
+--
+ALTER TABLE `IA_DB`
+  ADD PRIMARY KEY (`position`);
+
+--
+-- Indexes for table `TGF`
+--
+ALTER TABLE `TGF`
+  ADD PRIMARY KEY (`IdIA`);
+COMMIT;
+
+REATE USER TGF IDENTIFIED by 'TGF123Soleil';
+
+CREATE USER Serveur IDENTIFIED by 'Serveur123Soleil';
 
 REVOKE ALL PRIVILEGES, GRANT OPTION FROM TGF;
 
 REVOKE ALL PRIVILEGES, GRANT OPTION FROM Serveur;
 
-USE GTHSMEN;
-
 GRANT ALL ON Games TO Serveur;
 GRANT ALL ON IA_DB TO Serveur;
 GRANT ALL ON TGF TO TGF;
 GRANT SELECT ON TGF TO TGF;
+
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
