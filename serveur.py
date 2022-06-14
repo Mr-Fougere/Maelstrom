@@ -27,7 +27,7 @@ broker = '51.255.47.95'
 port = 1883 
 topics = ["newplayer"]
 # generate client ID with pub prefix randomly
-client_id = f'python-mqtt-{random.randint(0, 100)}'
+client_id = 'Serveur Python'
 username = 'Serveur'
 password = '123Soleil'
 lastNGame = ""
