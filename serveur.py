@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # python3.8
 
 import random
@@ -11,7 +12,7 @@ from datetime import datetime
 try:
     conn=mariadb.connect(
             user="Serveur",
-            password="123Soleil",
+            password="Serveur123Soleil",
             host="127.0.0.1",
             port=3306,
             database="GTHSMEN",
@@ -23,13 +24,13 @@ conn.autocommit =True
 cur = conn.cursor()
 cur2 =conn.cursor()
 
-broker = '51.255.47.95'
+broker = '51.159.161.21'
 port = 1883 
 topics = ["newplayer"]
 # generate client ID with pub prefix randomly
 client_id = f'python-mqtt-{random.randint(0, 100)}'
 username = 'Serveur'
-password = '123Soleil'
+password = 'Serveur123Soleil'
 lastNGame = ""
 def connect_mqtt() -> mqtt_client:
     def on_connect(client, userdata, flags, rc):
